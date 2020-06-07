@@ -27,7 +27,8 @@ public class MemberRequest {
         this.deleteState =deleteState;
     }
 
-    public Member toMember(){
+    public Member toMember(){K
+            K
         Member member = Member.builder()
                 .memberName(this.memberName)
                 .memberPw(this.memberPw)
