@@ -18,14 +18,13 @@ public class Member extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id ;
 
-//    @Column(nullable = false)
+    @Column(nullable = false)
     private String memberId;
 
-//    @Column(nullable = false)
-    @JsonIgnore()
+    @Column(nullable = false)
     private String memberPw;
 
-//    @Column( nullable = false)
+    @Column( nullable = false)
     private String memberName;
 
     @Enumerated(EnumType.STRING)

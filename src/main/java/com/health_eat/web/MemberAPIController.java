@@ -1,11 +1,10 @@
 package com.health_eat.web;
 
 
-import com.health_eat.service.MemberService;
+import com.health_eat.domain.member.MemberService;
 import com.health_eat.web.dto.MemberRequest;
 import com.health_eat.web.dto.Result;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.filters.ExpiresFilter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;

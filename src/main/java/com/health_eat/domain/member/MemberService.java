@@ -1,4 +1,4 @@
-package com.health_eat.service;
+package com.health_eat.domain.member;
 
 import ch.qos.logback.core.encoder.EchoEncoder;
 import com.health_eat.domain.DeleteState;
