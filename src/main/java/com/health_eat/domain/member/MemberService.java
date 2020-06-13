@@ -1,38 +1,27 @@
 package com.health_eat.domain.member;
 
-import ch.qos.logback.core.encoder.EchoEncoder;
-import com.health_eat.domain.DeleteState;
-import com.health_eat.domain.member.Member;
-import com.health_eat.domain.member.MemberRepository;
-import com.health_eat.web.dto.MemberRequest;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import jdk.nashorn.internal.runtime.options.Option;
+import com.health_eat.domain.member.dto.MemberRequest;
+import com.health_eat.util.JWTUtil;
+import com.health_eat.web.dto.common.PageModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class MemberService {
-    private final MemberRepository memberRepo;
+
+    private final MembersRepository memberRepo;
+
 
     public void saveMember(MemberRequest req) throws  Exception{
-        boolean isExists = memberRepo.existsByMemberId(req.getMemberId());
-        if(isExists == false){
+        boolean isExists = memberRepo.existsMemberByMemberId(req.getMemberId());
+        if(!isExists){
             req.setMemberPw(BCrypt.hashpw(req.getMemberPw(), BCrypt.gensalt()));
             memberRepo.save(req.toMember());
         }else{
@@ -40,27 +29,21 @@ public class MemberService {
         }
     }
 
-    public Page<Member> memberList(PageRequest pageRequest){
-        Page<Member> memberPage = memberRepo.findAll(pageRequest);
-        return memberPage;
+    public PageModel memberList(PageRequest pageRequest){
+        Page<Members> memberPage = memberRepo.findAll(pageRequest);
+        return new PageModel(memberPage);
     }
 
-    public String login(String id, String pw) throws  Exception{
-    Member member = memberRepo.findByMemberId(id).orElseThrow(() -> new Exception("존재하지 않는 아이디입니다."));
-    if(!BCrypt.checkpw(pw,member.getMemberPw())){
-        throw new Exception("비밀번호가 일치하지 않습니다.");
+    public String login(MemberRequest req) throws  Exception{
+    Members member = memberRepo.findByMemberId(req.getMemberId());
+    if(!BCrypt.checkpw(req.getMemberPw(),member.getMemberPw())){
+        throw new Exception("비밀번호가 일치하지 않거나 존재하지 않는 아이디");
     }else{
         Map<String, Object> obj = new HashMap<>();
         obj.put("id", member.getMemberId());
         obj.put("name", member.getMemberName());
-        String jwtString = Jwts.builder()
-                .setHeaderParam("typ", "JWT")
-                .setHeaderParam("issueDate", System.currentTimeMillis())
-                .setClaims(obj)
-                .signWith(SignatureAlgorithm.HS512 , "secret".getBytes("utf-8"))
-                .compact();
-        System.out.println(jwtString);
-    return jwtString;
+
+        return JWTUtil.createToken(obj);
     }
 
     }
