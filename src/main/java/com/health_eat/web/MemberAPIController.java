@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/api")
@@ -34,7 +35,7 @@ public class MemberAPIController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @GetMapping("/members")
+    @GetMapping("/members/list")
     public ResponseEntity<Result> memberList(PageableSearchRequest req){
         Result result;
         try {
@@ -50,7 +51,8 @@ public class MemberAPIController {
     public  ResponseEntity<Result> login(@RequestBody MemberRequest req, HttpServletResponse response){
         Result result;
         try {
-            response.setHeader("Authorization", memberService.login(req));
+            Map<String, String> tokenMap = memberService.login(req);
+            response.setHeader("accessToken", tokenMap.get("accessToken"));
            result= Result.OK(null);
 
         }catch (Exception e){
@@ -58,4 +60,20 @@ public class MemberAPIController {
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @PostMapping("/members/logout")
+    public  ResponseEntity<Result> logout( HttpServletResponse response){
+        Result result;
+        try {
+            String accessToken = response.getHeader("accessToken");
+            memberService.logout(accessToken);
+            response.setHeader("accessToken", "");
+            result= Result.OK(null);
+
+        }catch (Exception e){
+            result = Result.ERROR(e.getMessage());
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 }
